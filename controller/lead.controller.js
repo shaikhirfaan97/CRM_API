@@ -83,7 +83,7 @@ exports.getAssignedLead = async (req, res) => {
       role: req.user.role,
       action: "viewed",
       targetType: "Lead",
-      targetId: lead._id,
+      // targetId: lead._id,
       details: "Lead record viewed",
     });
     res.status(200).json(data);
