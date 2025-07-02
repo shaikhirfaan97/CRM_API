@@ -10,6 +10,7 @@ exports.createLead = async (req, res) => {
     };
 
     const lead = await leadService.addLead(body);
+
     res.status(201).json({ message: "Lead created", lead });
   } catch (error) {
     res
@@ -32,12 +33,12 @@ exports.updateLead = async (req, res) => {
       return res.status(404).json({ message: "Lead not found" });
     }
 
-    await logActivity({
+    logActivity({
       userId: req.user._id,
       action: "updated",
       targetType: "Lead",
       targetId: updatedLead._id,
-      details: `Lead updated: ${Object.keys(req.body).join(", ")}`
+      details: `Lead updated: ${Object.keys(req.body).join(", ")}`,
     });
 
     res.status(200).json({ message: "Lead updated", lead: updatedLead });
@@ -49,12 +50,20 @@ exports.updateLead = async (req, res) => {
   }
 };
 
-
 exports.deleteLead = async (req, res) => {
   const { id } = req.params;
 
   try {
     await leadService.deleteLead(id);
+
+    logActivity({
+      userId: req.user._id,
+      role: req.user.role,
+      action: "delete",
+      targetType: "Lead",
+      targetId: lead._id,
+      details: "Lead record delete",
+    });
     res.status(200).json({ message: "Lead Deleted" });
   } catch (error) {
     res.status(500).json({
@@ -67,7 +76,16 @@ exports.deleteLead = async (req, res) => {
 exports.getAssignedLead = async (req, res) => {
   const { id } = req.params;
   try {
-    const data = await leadService.findLeadsByAssignedUser (id);
+    const data = await leadService.findLeadsByAssignedUser(id);
+
+    logActivity({
+      userId: req.user._id,
+      role: req.user.role,
+      action: "viewed",
+      targetType: "Lead",
+      targetId: lead._id,
+      details: "Lead record viewed",
+    });
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({
