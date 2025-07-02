@@ -1,4 +1,5 @@
 const leadService = require("../services/leadService");
+const logActivity = require("../utils/activityLogger");
 
 exports.createLead = async (req, res) => {
   try {
@@ -31,6 +32,14 @@ exports.updateLead = async (req, res) => {
       return res.status(404).json({ message: "Lead not found" });
     }
 
+    await logActivity({
+      userId: req.user._id,
+      action: "updated",
+      targetType: "Lead",
+      targetId: updatedLead._id,
+      details: `Lead updated: ${Object.keys(req.body).join(", ")}`
+    });
+
     res.status(200).json({ message: "Lead updated", lead: updatedLead });
   } catch (error) {
     res.status(500).json({
@@ -39,6 +48,7 @@ exports.updateLead = async (req, res) => {
     });
   }
 };
+
 
 exports.deleteLead = async (req, res) => {
   const { id } = req.params;
